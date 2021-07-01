@@ -1,20 +1,20 @@
 from os import getenv
+    # reading env variables
 from dotenv import load_dotenv
+    # loading env variables from env file
 import discord
+    # discord API wrapper
+
+import command_handler
 
 load_dotenv()
+    # load env variables from env file
 
 class Bot(discord.Client):
     async def on_ready(self):
         print('Logged on as', self.user)
 
-    async def on_message(self, message):
-        # don't respond to ourselves
-        if message.author == self.user:
-            return
-
-        if message.content == 'what sound does wolfie make?':
-            await message.channel.send('In general Wolfie makes these sounds: whimper, whine, growl, rarely bark, howling, moan, yawn, and shrill yaps (bark) Wolfie will howl to signal packs, gather them, warn others, claim territory, before a hunt and after kills, when excited, when mournful, and as a way to socialize.')
+    on_message = command_handler.on_message
 
 wolfie_bot = Bot()
 wolfie_bot.run(getenv('bot_token'))
