@@ -52,8 +52,13 @@ class Bot(discord.Client):
         self.command_handler = Command_handler()
 
     
-    def add_commands():
-        pass
+    # add commands
+    def add_commands(self, commands):
+        for command in commands:
+            self.command_handler.add_listener(
+                command['command_name'],
+                command['callback']
+            )
 
 
     # notify that we've connected
@@ -89,4 +94,6 @@ class Bot(discord.Client):
 
 
 wolfie_bot = Bot(config['bot_prefix'])
+from commands import commands
+wolfie_bot.add_commands(commands)
 wolfie_bot.run(getenv('bot_token'))
