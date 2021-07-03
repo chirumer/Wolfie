@@ -44,8 +44,6 @@ class Command_handler():
                 'callback': callback
             })
 
-        print(f'added listener {listener_id}:', self._listeners)
-
         return listener_id 
             # unique id
                 
