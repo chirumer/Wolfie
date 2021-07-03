@@ -16,6 +16,62 @@ config = json.load(open('../config.json'))
     # load config
 
 
+class Event_dispatcher():
+        # dispatch events to listeners
+
+    _next_listener_id = 0
+        # id of next event listener
+
+    # constructor 
+    def __init__(self):
+        self._listeners = {}
+            # maps event-type to listeners
+
+    # add listener
+    def add_listener(self, event_type, callback):
+
+        # map event to its listeners
+        listener_id = self._next_listener_id
+        self._next_listener_id += 1
+        if event_type not in self._listeners:
+            self._listeners[event_type] = [{
+                'id': listener_id,
+                'callback': callback
+            }]
+        else:
+            self._listeners.get(event_type).append({
+                'id': listener_id,
+                'callback': callback
+            })
+        return listener_id
+            # unique id
+
+    # remove event listener
+    def remove_listener(self, event_type, remove_id):
+
+        for index, listener in enumerate(self._listeners.get(event_type)):
+            if listener['id'] == remove_id:
+                self._listeners.get(event_type).pop(index)
+                break
+        if not self._listeners.get(even_type):
+                # no listeners for event
+            self._listeners.pop(event_type)
+
+    # remove all listeners
+    def remove_all_listeners(self, event_type):
+        self._listeners.pop(event_type)
+
+    # dispatch event to its listeners
+    def emit(self, event_type, payload):
+        if not self._listeners.get(event_type):
+                # no listeners
+            return
+        for listener in self._listeners.get(event_type):
+            asyncio.create_task(
+                listener['callback'](payload)
+            )
+
+
 class Command_handler():
     # handles command events
 
@@ -81,10 +137,11 @@ class Command_handler():
                 self._default_listeners.pop(index)
                 break
         
-    # remove all listeners for event
+    # remove all listeners for command
     def remove_all_listeners(self, command):
         self._listeners.pop(command)
 
+    # remove all default listeners
     def remove_all_default_listeners(self):
         self._default_listeners = []
 
@@ -112,6 +169,7 @@ class Bot(discord.Client):
         discord.Client.__init__(self)
         self.bot_prefix = bot_prefix
         self._command_handler = Command_handler()
+        self._event_handler = Event_dispatcher()
 
     
     # add commands
@@ -128,12 +186,20 @@ class Bot(discord.Client):
         self._command_handler.add_default_listener(default_command)
 
 
+    def add_message_listener(self, callback):
+        self._event_handler.add_listener('message', callback)
+
     # notify that we've connected
     async def on_ready(self):
         print('Logged on as', self.user)
 
 
     async def on_message(self, message):
+        
+        # dispatch message event
+        payload = {}
+        payload['message'] = message
+        self._event_handler.emit('message', payload)
 
         # don't respond to ourselves
         if message.author == self.user:
@@ -167,4 +233,7 @@ wolfie_bot = Bot(config['bot_prefix'])
 from commands import commands, default_command
 wolfie_bot.add_commands(commands)
 wolfie_bot.add_default_command(default_command)
+from statistics import guild_message_statistics
+wolfie_bot.add_message_listener(guild_message_statistics)
+print('connecting bot')
 wolfie_bot.run(getenv('bot_token'))
