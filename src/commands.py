@@ -21,7 +21,8 @@ meta['description'] = 'bot says hi'
 
 @bot_command(meta)
 async def hi_command(ctx, action):
-    await ctx.reply('hi')
+    message = ctx['message']
+    await message.reply('hi')
 
     # help command
 meta = {}
@@ -31,6 +32,7 @@ meta['description'] = 'bot commands usage info'
 
 @bot_command(meta)
 async def help_command(ctx, action):
+    message = ctx['message']
 
     help_str = '**Available commands:**'
     help_str += "\n"
@@ -42,4 +44,4 @@ async def help_command(ctx, action):
             '**help {command name}**'
     )
 
-    await ctx.channel.send(help_str)
+    await message.channel.send(help_str)

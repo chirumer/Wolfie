@@ -117,8 +117,11 @@ class Bot(discord.Client):
                     'for help'
                 )
             else:
+                ctx = {}
+                ctx['message'] = message
+                ctx['bot'] = self
                 action = message.content[len(self.bot_prefix):].strip()
-                self.command_handler.emit(command, message, action)
+                self.command_handler.emit(command, ctx, action)
 
 
 wolfie_bot = Bot(config['bot_prefix'])
