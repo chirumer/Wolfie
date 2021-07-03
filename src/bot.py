@@ -19,29 +19,59 @@ config = json.load(open('../config.json'))
 class Command_handler():
     # handles command events
 
+    _next_listener_id = 0
+        # id of the next listener
+
+    # constructor
     def __init__(self):
-        self._listeners = []
+        self._listeners = {}
+            # maps command to its listeners
 
     # add listener
-    def add_listener(self, event, callback):
-        self._listeners.append({
-            'event': event,
-            'callback': callback
-        })
+    def add_listener(self, command, callback):
 
-    # remove listeners
-    def remove_listener(self, event):
-        self._listeners = (
-            [x for x in self._listeners if x['event'] != event]
-        )
+        # map event to array of listeners
+        listener_id = self._next_listener_id
+        self._next_listener_id += 1
+        if command not in self._listeners:
+            self._listeners[command] = [{
+                    'id': listener_id,
+                    'callback': callback
+            }]
+        else:
+            self._listeners.get(command).append({
+                'id': listener_id,
+                'callback': callback
+            })
+
+        print(f'added listener {listener_id}:', self._listeners)
+
+        return listener_id 
+            # unique id
+                
+    # remove listener
+    def remove_listener(self, command, remove_id):
+
+        for index, item in enumerate(self._listeners.get(command)):
+            if item['id'] == remove_id:
+                self._listeners.get(command).pop(index)
+                break
+        
+    # remove all listeners for event
+    def remove_all_listeners(self, command):
+        self._listeners.pop(command)
 
     # call listeners
-    def emit(self, event, ctx, action):
-        for listener in self._listeners:
-            if listener['event'] == event:
-                asyncio.create_task(
-                    listener['callback'](ctx, action)
-                )
+    def emit(self, command, ctx, action):
+        if not self._listeners.get(command):
+                #if no listeners for the command
+            return
+
+        # run all listeners asynchronously
+        for listener in self._listeners.get(command):
+            asyncio.create_task(
+                listener['callback'](ctx, action)
+            )
 
 
 class Bot(discord.Client):
