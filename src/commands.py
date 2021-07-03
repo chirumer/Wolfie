@@ -1,3 +1,15 @@
+async def default_command(ctx):
+    message = ctx['message']
+    bot = ctx['bot']
+
+    reply_str = ''
+    reply_str += 'Unknown_command!'
+    reply_str += f'\n**type:** {bot.bot_prefix} help'
+    reply_str += '\nfor help'
+
+    await message.reply(reply_str)
+
+
 commands = []
 
 # decorator to add command to list
