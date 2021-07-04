@@ -27,6 +27,9 @@ def make_command(func, meta):
 import src.bot_commands.hi as hi
 make_command(hi.command, hi.meta)
 
+    # reading command
+import src.bot_commands.reading as reading
+make_command(reading.command, reading.meta)
 
     # help command
 help_meta = {}

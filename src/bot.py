@@ -180,7 +180,7 @@ class Message_sessions_handler():
             'expires_at': expires_at,
             'target': target,
             'callback': callback,
-            'timeout_callback': timeout_callbacklen,
+            'timeout_callback': timeout_callback,
             'timeout_ctx': timeout_ctx,
             'payload': payload
         })
@@ -240,7 +240,7 @@ class Bot(discord.Client):
 
     # add message session
     def add_message_session(self, expires_at, target, callback, timeout_callback,
-            timeout_ctx, payload):
+            timeout_ctx, payload=None):
         self._message_sessions.add(expires_at, target, callback, timeout_callback,
                 timeout_ctx, payload)
 
@@ -299,7 +299,7 @@ class Bot(discord.Client):
                 # incomplete command
                 await message.reply(
                     'No command specified..\n'
-                    f"**type** {self.bot_prefix} help\n"
+                    f'**type** {self.bot_prefix} help\n'
                     'for help'
                 )
             else:
@@ -307,6 +307,7 @@ class Bot(discord.Client):
                 ctx['message'] = message
                 ctx['bot'] = self
                 action = message.content[len(self.bot_prefix):].strip()
+                action = action[len(command):].strip()
                 self._command_handler.emit(command, ctx, action)
 
 
