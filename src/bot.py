@@ -287,8 +287,8 @@ class Bot(discord.Client):
             return
 
         # if user is instructing us
-        if message.content.startswith(self.bot_prefix):
-
+        if message.content.split() and message.content.split()[0] == self.bot_prefix):
+        
             command = (
                 message.content[len(self.bot_prefix):].split()
                     and message.content[len(self.bot_prefix):].split()[0]
