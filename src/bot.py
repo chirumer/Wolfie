@@ -8,6 +8,8 @@ import json
     # parse json file
 import asyncio
     # asynchronous programming
+from datetime import datetime
+    # working with time
 
 load_dotenv()
     # load env variables from env file
@@ -163,6 +165,62 @@ class Command_handler():
             )
 
 
+class Message_sessions_handler():
+        # handles message sessions
+
+    # constructor
+    def __init__(self):
+        self._sessions = []
+
+    # add a session
+    def add(self, expires_at, target, callback, timeout_callback, 
+            timeout_ctx, payload):
+
+        self._sessions.append({
+            'expires_at': expires_at,
+            'target': target,
+            'callback': callback,
+            'timeout_callback': timeout_callbacklen,
+            'timeout_ctx': timeout_ctx,
+            'payload': payload
+        })
+
+    # check if part of session
+    def emit(self, incoming, ctx):
+
+        any_expired = False
+        is_part_of_session = False
+        time_now = datetime.now()
+
+        for index, session in enumerate(self._sessions):
+            if session['expires_at'] <= time_now:
+                any_expired = True
+            if session['target'] == incoming:
+                asyncio.create_task(
+                        session['callback'](ctx, session['payload'])
+                )
+                self._sessions.pop(index)
+                is_part_of_session = True
+                break
+
+        if any_expired:
+                # remove expired sessions
+            new_sessions = []
+            for session in self._sessions:
+                if session['expires_at'] > time_now:
+                    new_sessions.append(session)
+                else:
+                    asyncio.create_task(
+                        session['timeout_callback'](
+                            session['timeout_ctx'],
+                            session['payload']
+                        )
+                    )
+            self._sessions = new_sessions
+
+        return is_part_of_session
+
+
 class Bot(discord.Client):
 
     def __init__(self, bot_prefix):
@@ -170,8 +228,8 @@ class Bot(discord.Client):
         self.bot_prefix = bot_prefix
         self._command_handler = Command_handler()
         self._event_handler = Event_dispatcher()
+        self._message_sessions = Message_sessions_handler()
 
-    
     # add commands
     def add_commands(self, commands):
         for command in commands:
@@ -180,12 +238,18 @@ class Bot(discord.Client):
                 command['callback']
             )
 
+    # add message session
+    def add_message_session(self, expires_at, target, callback, timeout_callback,
+            timeout_ctx, payload):
+        self._message_sessions.add(expires_at, target, callback, timeout_callback,
+                timeout_ctx, payload)
 
     # add default command
     def add_default_command(self, default_command):
         self._command_handler.add_default_listener(default_command)
 
 
+    # add message listener
     def add_message_listener(self, callback):
         self._event_handler.add_listener('message', callback)
 
@@ -196,13 +260,30 @@ class Bot(discord.Client):
 
     async def on_message(self, message):
         
+        # check if message part of sessions
+        incoming = {
+            'author': message.author,
+            'channel': message.channel
+        }
+        ctx = {
+            'message': message,
+            'bot': self
+        }
+        in_session = self._message_sessions.emit(incoming, ctx)
+
         # dispatch message event
         payload = {}
         payload['message'] = message
+        payload['is_self'] = message.author == self.user
+        payload['in_session'] = in_session
         self._event_handler.emit('message', payload)
 
         # don't respond to ourselves
         if message.author == self.user:
+            return
+
+        # ignore session messages
+        if in_session:
             return
 
         # if user is instructing us

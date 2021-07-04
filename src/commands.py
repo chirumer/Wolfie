@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+    # working with time
+
 async def default_command(ctx):
     message = ctx['message']
     bot = ctx['bot']
@@ -57,3 +60,38 @@ async def help_command(ctx, action):
     )
 
     await message.channel.send(help_str)
+
+    # test
+meta = {}
+meta['invoking_keywords'] = ['test']
+meta['name'] = 'test'
+meta['description'] = 'testing'
+
+@bot_command(meta)
+async def test_command(ctx, action):
+    message = ctx['message']
+    bot = ctx['bot']
+
+    target = {}
+    target['author'] = message.author
+    target['channel'] = message.channel
+
+    async def callback(ctx, payload):
+        message = ctx['message']
+        await message.reply(payload)
+    async def timeout_callback(ctx, payload):
+        message = ctx['message']
+        await message.reply('did you forget about me?')
+
+    expires_at = datetime.now() + timedelta(seconds=10)
+
+    sent_message = await message.reply('reply to me in 10 seconds')
+    timeout_ctx = {}
+    timeout_ctx['message'] = sent_message
+    timeout_ctx['bot'] = bot
+
+    payload = 'thanks for replying'
+
+    bot.add_message_session(expires_at, target, callback, timeout_callback,
+        timeout_ctx, payload);
+
