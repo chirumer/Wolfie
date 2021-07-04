@@ -1,5 +1,5 @@
-from os import getenv
-    # reading env variables
+import os
+    # os related stuff
 from dotenv import load_dotenv
     # loading env variables from env file
 import discord
@@ -14,7 +14,7 @@ from datetime import datetime
 load_dotenv()
     # load env variables from env file
 
-config = json.load(open('../config.json'))
+config = json.load(open('./config.json'))
     # load config
 
 
@@ -311,10 +311,10 @@ class Bot(discord.Client):
 
 
 wolfie_bot = Bot(config['bot_prefix'])
-from commands import commands, default_command
+from src.commands import commands, default_command
 wolfie_bot.add_commands(commands)
 wolfie_bot.add_default_command(default_command)
-from statistics import guild_message_statistics
+from src.statistics import guild_message_statistics
 wolfie_bot.add_message_listener(guild_message_statistics)
 print('connecting bot')
-wolfie_bot.run(getenv('bot_token'))
+wolfie_bot.run(os.getenv('bot_token'))
