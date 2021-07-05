@@ -32,6 +32,10 @@ make_command(hi.command, hi.meta)
 import src.bot_commands.reading as reading
 make_command(reading.command, reading.meta, reading.help)
 
+    # bank command
+import src.bot_commands.bank as bank
+make_command(bank.command, bank.meta, bank.help)
+
     # help command
 help_meta = {}
 help_meta['invoking_keywords'] = ['help']

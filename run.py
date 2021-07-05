@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
     # load env variables from env file
 
-
-from src.bot import wolfie_bot
-print('connecting bot')
-wolfie_bot.run(os.getenv('bot_token'))
+if __name__ == '__main__':
+    from src.bot import wolfie_bot
+    print('connecting bot')
+    wolfie_bot.run(os.getenv('bot_token'))
