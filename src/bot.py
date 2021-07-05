@@ -1,7 +1,5 @@
 import os
     # os related stuff
-from dotenv import load_dotenv
-    # loading env variables from env file
 import discord
     # discord API wrapper
 import json
@@ -11,8 +9,6 @@ import asyncio
 from datetime import datetime
     # working with time
 
-load_dotenv()
-    # load env variables from env file
 
 config = json.load(open('./config.json'))
     # load config
@@ -332,5 +328,3 @@ wolfie_bot.add_commands(commands)
 wolfie_bot.add_default_command(default_command)
 from src.statistics import guild_message_statistics
 wolfie_bot.add_message_listener(guild_message_statistics)
-print('connecting bot')
-wolfie_bot.run(os.getenv('bot_token'))
