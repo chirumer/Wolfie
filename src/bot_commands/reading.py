@@ -5,6 +5,16 @@ import random
 
 reading_file = open('assets/harry_potter.txt')
 
+async def help(ctx):
+    message = ctx['message']
+    bot = ctx['bot']
+
+    await message.reply(
+        f'**type** {bot.bot_prefix} reading start\n'
+        'to check your reading speed'
+    )
+
+
     #meta
 meta = {}
 meta['invoking_keywords'] = ['reading']
