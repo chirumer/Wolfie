@@ -160,7 +160,7 @@ async def start(ctx):
     }
 
     bot.add_message_session(expires_at, target, on_ready,
-            timeout, timeout_ctx)
+            timeout, timeout_ctx, payload=False)
 
     def interpret(data, user):
         if data['words_read'] == 0:

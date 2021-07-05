@@ -164,61 +164,76 @@ class Command_handler():
                 listener['callback'](ctx, action)
             )
 
-
-class Message_sessions_handler():
-        # handles message sessions
+class Sessions_handler():
+    # handles sessions
 
     # constructor
     def __init__(self):
-        self._sessions = []
+        self._sessions = {}
+            # maps session-type to sessions
 
-    # add a session
-    def add(self, expires_at, target, callback, timeout_callback, 
-            timeout_ctx, payload):
+    # add listener
+    def add(self, session_type, expires_at, target, callback,
+            timeout_callback=None, timeout_ctx=None, payload=None):
 
-        self._sessions.append({
+        session = {
             'expires_at': expires_at,
             'target': target,
             'callback': callback,
             'timeout_callback': timeout_callback,
             'timeout_ctx': timeout_ctx,
             'payload': payload
-        })
+        }
 
-    # check if part of session
-    def emit(self, incoming, ctx):
+        if not session_type in self._sessions:
+            self._sessions[session_type] = [session]
+        else:
+            self._sessions[session_type].append(session)
+
+    def emit(self, incoming_type, incoming, ctx):
+
+        in_session = False
+
+        if not self._sessions.get(incoming_type):
+            return in_session
 
         any_expired = False
-        is_part_of_session = False
         time_now = datetime.now()
 
-        for index, session in enumerate(self._sessions):
+        for index, session in enumerate(self._sessions[incoming_type]):
             if session['expires_at'] <= time_now:
                 any_expired = True
-            if session['target'] == incoming:
+            elif session['target'] == incoming:
                 asyncio.create_task(
-                        session['callback'](ctx, session['payload'])
+                    session['callback'](ctx, session['payload'])
+                    if session['payload'] != None
+                    else
+                    session['callback'](ctx)
                 )
-                self._sessions.pop(index)
-                is_part_of_session = True
+                self._sessions[incoming_type].pop(index)
+                in_session = True
                 break
 
         if any_expired:
                 # remove expired sessions
-            new_sessions = []
-            for session in self._sessions:
-                if session['expires_at'] > time_now:
-                    new_sessions.append(session)
-                else:
-                    asyncio.create_task(
-                        session['timeout_callback'](
-                            session['timeout_ctx'],
-                            session['payload']
+            for session_type in self._sessions:
+                new_sessions = []
+                for session in self._sessions[session_type]:
+                    if session['expires_at'] > time_now:
+                        new_sessions.append(session)
+                    elif session['timeout_callback']:
+                        asyncio.create_task(
+                            session['timeout_callback'](
+                                session['timeout_ctx'],
+                                session['payload']
+                            )
+                            if session['payload'] != None
+                            else
+                            session['timeout_callback'](
+                                session['timeout_ctx']
+                            )
                         )
-                    )
-            self._sessions = new_sessions
-
-        return is_part_of_session
+                self._sessions[session_type] = new_sessions
 
 
 class Bot(discord.Client):
@@ -228,7 +243,7 @@ class Bot(discord.Client):
         self.bot_prefix = bot_prefix
         self._command_handler = Command_handler()
         self._event_handler = Event_dispatcher()
-        self._message_sessions = Message_sessions_handler()
+        self._sessions = Sessions_handler()
 
     # add commands
     def add_commands(self, commands):
@@ -241,7 +256,7 @@ class Bot(discord.Client):
     # add message session
     def add_message_session(self, expires_at, target, callback, timeout_callback,
             timeout_ctx, payload=None):
-        self._message_sessions.add(expires_at, target, callback, timeout_callback,
+        self._sessions.add('message', expires_at, target, callback, timeout_callback,
                 timeout_ctx, payload)
 
     # add default command
@@ -269,7 +284,7 @@ class Bot(discord.Client):
             'message': message,
             'bot': self
         }
-        in_session = self._message_sessions.emit(incoming, ctx)
+        in_session = self._sessions.emit('message', incoming, ctx)
 
         # dispatch message event
         payload = {}
