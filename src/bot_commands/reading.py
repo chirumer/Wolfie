@@ -146,7 +146,7 @@ async def start(ctx):
             para_message = await message.channel.send(para)
             time_start = datetime.now()
 
-            expires_at = datetime.now() + timedelta(seconds=10)
+            expires_at = datetime.now() + timedelta(seconds=30)
             timeout_ctx['message'] = para_message
 
             bot.add_message_session(expires_at, target, on_respond, 
