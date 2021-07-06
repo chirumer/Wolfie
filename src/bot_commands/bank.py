@@ -1,64 +1,130 @@
-import os
-    # os related stuff
+from src.database import howls_db
+    # database
+from src.bot_commands.generic import improper_arguments, fix_args
+    # respond to improper command arguments
 
-def get_database(connection_string):
-        # get database object
-    from pymongo import MongoClient
-    client = MongoClient(connection_string)
-    return client['Wolfie']
+improper_arguments = fix_args(improper_arguments, cmd_name='bank')
 
-db = get_database(os.getenv('db_string'))
-howls_db = db['howls']
-
+    # meta
 meta = {}
 meta['name'] = 'bank'
 meta['invoking_keywords'] = ['bank']
 meta['description'] = 'this command is not for robbing banks'
 
-async def help(ctx):
-    message = ctx['message']
-    await message.reply('no help for you')
+    # wrapper for sub commands
+def sub_command(meta=None):
+    def internal(func):
+        sub_commands.append({
+            'name': func.__name__,
+            'caller': func,
+            'meta': meta
+        })
+        return func
+    return internal
 
+    # main command
 async def command(ctx, action):
+    if not action:
+        await improper_arguments(ctx)
+        return
+
+    message = ctx['message']
+    bot = ctx['bot']
 
     sub_command = action.split()[0]
+    action = action[len(sub_command):].strip()
 
-    if sub_command == 'create':
-        await create_bank(ctx)
+    for command in sub_commands:
+        if command['name'] == sub_command:
+            await command['caller'](ctx, action)
+            break
+    else:
+        await improper_arguments(ctx)
 
-    elif sub_command == 'work':
-        await work(ctx)
 
-    elif sub_command == 'view':
-        await view(ctx)
+sub_commands = []
 
-       
-async def create_bank(ctx):
+    # help function
+cmd_meta = {}
+cmd_meta['description'] = 'get help on sub-commands'
+@sub_command(cmd_meta)
+async def help(ctx, action=None):
+    if action:
+        await improper_arguments(ctx)
+        return
+
+    message = ctx['message']
+    bot = ctx['bot']
+
+    help_str = 'Available usages:\n\n'
+
+    for command in sub_commands:
+        help_str += (
+            f"**{bot.bot_prefix} bank {command['name']}**: "
+            f"{command['meta']['description']}\n"
+        )
+
+    await message.reply(help_str)
+
+    # create
+cmd_meta = {}
+cmd_meta['description'] = 'create a howling account'
+@sub_command(cmd_meta)
+async def create(ctx, action):
+    if action:
+        await improper_arguments(ctx)
+        return
+
     message = ctx['message']
 
+    reply = ''
+
     if await has_account(message.author.id):
-        await message.reply('you already have an account')
+        reply = 'you already have a howling account'
     else:
         howls_db.insert_one({'user': message.author.id, 'howls': 100})
-        await message.reply('your howling account now has 100 howls')
+        reply = 'created new howling account'
 
-async def view(ctx):
+    await message.reply(reply)
+
+    # view
+cmd_meta = {}
+cmd_meta['description'] = 'view howling account balance'
+@sub_command(cmd_meta)
+async def view(ctx, action):
+    if action:
+        await improper_arguments(ctx)
+        return
+
     message = ctx['message']
 
     user_account = howls_db.find_one({'user': message.author.id})
-    if user_account == None:
-        await message.reply('you do not have a howling account')
-    else:
-        await message.reply(f"you have {user_account['howls']} howls")
+    reply = ''
 
-async def work(ctx):
+    if user_account == None:
+        reply = 'you do not have a howling account'
+    else:
+        reply = f"you have {user_account['howls']} howls"
+    await message.reply(reply)
+
+    # work
+cmd_meta = {}
+cmd_meta['description'] = 'work and earn howls'
+@sub_command(cmd_meta)
+async def work(ctx, action):
+    if action:
+        await improper_arguments(ctx)
+        return
+
     message = ctx['message']
+    reply = ''
 
     if not await has_account(message.author.id):
-        await message.reply('no account')
+        reply = 'you need a howling account to work'
     else:
         howls_db.update({'user': message.author.id}, {'$inc': {'howls': 10}})
-        await message.reply('rewarded 10 howls for hard work')
+        reply = 'rewarded 10 howls for hard work'
+    await message.reply(reply)
  
 async def has_account(user):
     user_account = howls_db.find_one({'user': user})
