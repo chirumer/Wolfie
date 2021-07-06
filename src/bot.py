@@ -212,12 +212,8 @@ class Sessions_handler():
 
     def emit(self, incoming_type, incoming, ctx):
 
-        print('type', len(self._sessions))
-
         if not self._sessions.get(incoming_type):
             return False
-
-        print('msg', len(self._sessions.get(incoming_type)))
 
         if self.is_accurate:
             for index, session in enumerate(self._sessions[incoming_type]):
