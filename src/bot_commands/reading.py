@@ -133,20 +133,17 @@ async def start(ctx):
             para_message = await message.channel.send(para)
             time_start = datetime.now()
 
-            expires_at = datetime.now() + timedelta(seconds=30)
             timeout_ctx['message'] = para_message
 
-            bot.add_message_session(expires_at, target, on_respond, 
+            bot.add_message_session(30, target, on_respond, 
                     timeout, timeout_ctx, payload)
 
-        expires_at = datetime.now() + timedelta(seconds=30)
         timeout_ctx['message'] = para_message
 
-        bot.add_message_session(expires_at, target, on_respond,
+        bot.add_message_session(30, target, on_respond,
                 timeout, timeout_ctx, payload)
 
 
-    expires_at = datetime.now() + timedelta(seconds=10)
     target = {
         'author': user,
         'channel': message.channel
@@ -156,7 +153,7 @@ async def start(ctx):
         'bot': bot
     }
 
-    bot.add_message_session(expires_at, target, on_ready,
+    bot.add_message_session(10, target, on_ready,
             timeout, timeout_ctx, payload=False)
 
     def interpret(data, user):

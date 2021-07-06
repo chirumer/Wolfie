@@ -6,7 +6,7 @@ import json
     # parse json file
 import asyncio
     # asynchronous programming
-from datetime import datetime
+from datetime import datetime, timedelta
     # working with time
 
 
@@ -169,8 +169,10 @@ class Sessions_handler():
             # maps session-type to sessions
 
     # add listener
-    def add(self, session_type, expires_at, target, callback,
+    def add(self, session_type, timeout, target, callback,
             timeout_callback=None, timeout_ctx=None, payload=None):
+
+        expires_at = datetime.now() + timedelta(seconds=timeout)
 
         session = {
             'expires_at': expires_at,
@@ -255,9 +257,9 @@ class Bot(discord.Client):
             )
 
     # add message session
-    def add_message_session(self, expires_at, target, callback, timeout_callback,
+    def add_message_session(self, timeout, target, callback, timeout_callback,
             timeout_ctx, payload=None):
-        self._sessions.add('message', expires_at, target, callback, timeout_callback,
+        self._sessions.add('message', timeout, target, callback, timeout_callback,
                 timeout_ctx, payload)
 
     # add default command
