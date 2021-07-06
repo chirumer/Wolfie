@@ -33,11 +33,7 @@ help = sub_command(help_meta)(help)
 cmd_meta = {}
 cmd_meta['description'] = 'create a howling account'
 @sub_command(cmd_meta)
-async def create(ctx, action):
-    if action:
-        await improper_arguments(ctx)
-        return
-
+async def create(ctx):
     message = ctx['message']
 
     reply = ''
@@ -54,17 +50,13 @@ async def create(ctx, action):
 cmd_meta = {}
 cmd_meta['description'] = 'view howling account balance'
 @sub_command(cmd_meta)
-async def view(ctx, action):
-    if action:
-        await improper_arguments(ctx)
-        return
-
+async def view(ctx):
     message = ctx['message']
 
     user_account = howls_db.find_one({'user': message.author.id})
     reply = ''
 
-    if user_account == none:
+    if user_account == None:
         reply = 'you do not have a howling account'
     else:
         reply = f"you have {user_account['howls']} howls"
@@ -74,11 +66,7 @@ async def view(ctx, action):
 cmd_meta = {}
 cmd_meta['description'] = 'work and earn howls'
 @sub_command(cmd_meta)
-async def work(ctx, action):
-    if action:
-        await improper_arguments(ctx)
-        return
-
+async def work(ctx):
     message = ctx['message']
     reply = ''
 

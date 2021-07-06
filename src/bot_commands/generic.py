@@ -19,11 +19,7 @@ def fix_args(func, *args, **kwargs):
 help_meta = {}
 help_meta['description'] = 'get help on sub-commands'
 def generate_generic_help(cmd_name, sub_commands, invalid_caller):
-    async def help(ctx, action=None):
-        if action:
-            await invalid_caller(ctx)
-            return
-
+    async def help(ctx):
         message = ctx['message']
         bot = ctx['bot']
 
@@ -53,7 +49,13 @@ def generate_main_command(sub_commands, invalid_caller):
 
         for command in sub_commands:
             if command['name'] == sub_command:
-                await command['caller'](ctx, action)
+                if command['caller'].__code__.co_argcount == 1:
+                    if action:
+                        await invalid_caller(ctx)
+                    else:
+                        await command['caller'](ctx)
+                else:
+                    await command['caller'](ctx, action)
                 break
         else:
             await invalid_caller(ctx)
