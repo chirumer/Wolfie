@@ -235,7 +235,12 @@ class Sessions_handler():
 class Bot(discord.Client):
 
     def __init__(self, bot_prefix):
-        discord.Client.__init__(self)
+        discord.Client.__init__(
+            self,
+            activity=discord.Game(
+                f'{bot_prefix} help'
+            )
+        )
         self.bot_prefix = bot_prefix
         self._command_handler = Command_handler()
         self._event_handler = Event_dispatcher()
