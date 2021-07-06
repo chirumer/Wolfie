@@ -164,8 +164,9 @@ class Sessions_handler():
     # handles sessions
 
     # constructor
-    def __init__(self):
+    def __init__(self, is_accurate=True):
         self._sessions = {}
+        self.is_accurate = is_accurate
             # maps session-type to sessions
 
     # add listener
@@ -188,12 +189,50 @@ class Sessions_handler():
         else:
             self._sessions[session_type].append(session)
 
+        if self.is_accurate:
+            async def expire_session(target_session):
+                await asyncio.sleep(timeout)
+                for session in self._sessions.get(session_type, []):
+                    if session == target_session:
+                        asyncio.create_task(
+                            session['timeout_callback'](
+                                session['timeout_ctx'],
+                                session['payload']
+                            )
+                            if session['payload'] != None
+                            else
+                            session['timeout_callback'](
+                                session['timeout_ctx']
+                            )
+                        )
+                        self._sessions.get(session_type).remove(session)
+                        break
+            asyncio.create_task(expire_session(session))
+
+
     def emit(self, incoming_type, incoming, ctx):
 
-        in_session = False
+        print('type', len(self._sessions))
 
         if not self._sessions.get(incoming_type):
-            return in_session
+            return False
+
+        print('msg', len(self._sessions.get(incoming_type)))
+
+        if self.is_accurate:
+            for index, session in enumerate(self._sessions[incoming_type]):
+                if session['target'] == incoming:
+                    asyncio.create_task(
+                        session['callback'](ctx, session['payload'])
+                        if session['payload'] != None
+                        else
+                        session['callback'](ctx)
+                    )
+                    self._sessions[incoming_type].pop(index)
+                    return True
+            return False
+
+        in_session = False
 
         any_expired = False
         time_now = datetime.now()
