@@ -2,67 +2,54 @@ from datetime import datetime, timedelta
     # working with time
 import random
     # random selection
+from src.bot_commands.generic import (
+    improper_arguments, fix_args,
+    generate_generic_help, help_meta,
+    generate_sub_command_wrapper,
+    generate_main_command
+) # generic stuff
+
+sub_commands = []
+
+sub_command = generate_sub_command_wrapper(sub_commands)
+improper_arguments = fix_args(improper_arguments, cmd_name='reading')
 
 reading_file = open('assets/harry_potter.txt')
+# TO CHANGE
+# bot must select a book from multiple books
+# optionally get book from the internet
+# more processing (don't cut off sentences)
+# tell user "excerpts from book .." at end
 
-async def help(ctx):
-    message = ctx['message']
-    bot = ctx['bot']
-
-    await message.reply(
-        f'**type** {bot.bot_prefix} reading start\n'
-        'to check your reading speed'
-    )
-
+#### exports
 
     #meta
 meta = {}
-meta['invoking_keywords'] = ['reading']
 meta['name'] = 'reading'
+meta['invoking_keywords'] = ['reading']
 meta['description'] = 'check your reading speed'
-meta['help'] = 'help not yet written'
 
-async def command(ctx, action):
+    # main command
+command = generate_main_command(sub_commands, improper_arguments)
+
+    # help function
+help = generate_generic_help('reading', sub_commands, improper_arguments)
+help = sub_command(help_meta)(help)
+
+#### sub commands
+
+    # stats
+cmd_meta = {}
+cmd_meta['description'] = 'view reading speed stats (yours/general)'
+@sub_command(cmd_meta)
+async def stats(ctx):
     message = ctx['message']
-    bot = ctx['bot']
+    await message.reply('not implemented')
 
-    sub_command = (
-        action.split() and action.split()[0]
-    )
-
-    if not sub_command:
-
-        # incomplete subcommand
-        await message.reply(
-            'Incomplete command..\n'
-            f'**type {bot.bot_prefix} help reading**\n'
-            'for help'
-        )
-        return
-
-    action = action[len(sub_command):]
-
-    if sub_command == 'start':
-
-        if action:
-            await message.reply(
-                'Too many arguments..\n'
-                f'**type {bot.bot_prefix} help reading\n'
-                'for help'
-            )
-            return
-
-        await start(ctx)
-
-    else:
-        # non existent subcommand
-        await message.reply(
-            'Incorrect command..\n'
-            f'**type {bot.bot_prefix} help reading**\n'
-            'for help'
-        )
-
-
+    # start
+cmd_meta = {}
+cmd_meta['description'] = 'check your reading speed'
+@sub_command(cmd_meta)
 async def start(ctx):
     message = ctx['message']
     bot = ctx['bot']
@@ -179,4 +166,3 @@ async def start(ctx):
         reading_speed = data['total_time']/data['words_read']
         wpm = 60*(1/reading_speed.total_seconds())
         return f"{user}'s reading_speed: {wpm} words per minute"
-
