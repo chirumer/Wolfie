@@ -129,7 +129,7 @@ async def start(ctx):
 
             if message.content == 'stop':
                 await message.channel.send('note: last para not counted')
-                await message.channel.send(interpret(payload, user))
+                await message.channel.send(interpret(payload, user.mention))
                 return
 
             if message.content != 'ok':
@@ -152,7 +152,7 @@ async def start(ctx):
             bot.add_message_session(expires_at, target, on_respond, 
                     timeout, timeout_ctx, payload)
 
-        expires_at = datetime.now() + timedelta(seconds=10)
+        expires_at = datetime.now() + timedelta(seconds=30)
         timeout_ctx['message'] = para_message
 
         bot.add_message_session(expires_at, target, on_respond,
