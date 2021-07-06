@@ -1,3 +1,4 @@
+    # message for user
 async def improper_arguments(ctx, cmd_name):
     message = ctx['message']
     bot = ctx['bot']
@@ -8,11 +9,13 @@ async def improper_arguments(ctx, cmd_name):
         'for help'
     )
 
+    # helper
 def fix_args(func, *args, **kwargs):
     async def fixed(ctx):
         await func(ctx, *args, **kwargs)
     return fixed
 
+    # generic help command
 help_meta = {}
 help_meta['description'] = 'get help on sub-commands'
 async def generic_help(ctx, cmd_name, sub_commands):
@@ -28,3 +31,16 @@ async def generic_help(ctx, cmd_name, sub_commands):
         )
 
     await message.reply(help_str)
+
+    # generate wrapper for sub commands
+def generate_sub_command_wrapper(sub_commands):
+    def sub_command(meta=None):
+        def internal(func):
+            sub_commands.append({
+                'name': func.__name__,
+                'caller': func,
+                'meta': meta
+            })
+            return func
+        return internal
+    return sub_command

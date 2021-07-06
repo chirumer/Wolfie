@@ -1,26 +1,22 @@
 from src.database import howls_db
     # database
-from src.bot_commands.generic import improper_arguments, fix_args, generic_help, help_meta
-    # generic stuff
+from src.bot_commands.generic import ( 
+    improper_arguments, fix_args, 
+    generic_help, help_meta, generate_sub_command_wrapper
+) # generic stuff
+
+sub_commands = []
 
 improper_arguments = fix_args(improper_arguments, cmd_name='bank')
+sub_command = generate_sub_command_wrapper(sub_commands)
+
+#### exports
 
     # meta
 meta = {}
 meta['name'] = 'bank'
 meta['invoking_keywords'] = ['bank']
 meta['description'] = 'this command is not for robbing banks'
-
-    # wrapper for sub commands
-def sub_command(meta=None):
-    def internal(func):
-        sub_commands.append({
-            'name': func.__name__,
-            'caller': func,
-            'meta': meta
-        })
-        return func
-    return internal
 
     # main command
 async def command(ctx, action):
@@ -41,9 +37,6 @@ async def command(ctx, action):
     else:
         await improper_arguments(ctx)
 
-
-sub_commands = []
-
     # help function
 @sub_command(help_meta)
 async def help(ctx, action=None):
@@ -51,6 +44,8 @@ async def help(ctx, action=None):
         await improper_arguments(ctx)
         return
     await generic_help(ctx, 'bank', sub_commands)
+
+#### sub commands
 
     # create
 cmd_meta = {}
