@@ -1,7 +1,7 @@
 from src.database import howls_db
     # database
-from src.bot_commands.generic import improper_arguments, fix_args
-    # respond to improper command arguments
+from src.bot_commands.generic import improper_arguments, fix_args, generic_help, help_meta
+    # generic stuff
 
 improper_arguments = fix_args(improper_arguments, cmd_name='bank')
 
@@ -45,26 +45,12 @@ async def command(ctx, action):
 sub_commands = []
 
     # help function
-cmd_meta = {}
-cmd_meta['description'] = 'get help on sub-commands'
-@sub_command(cmd_meta)
+@sub_command(help_meta)
 async def help(ctx, action=None):
     if action:
         await improper_arguments(ctx)
         return
-
-    message = ctx['message']
-    bot = ctx['bot']
-
-    help_str = 'Available usages:\n\n'
-
-    for command in sub_commands:
-        help_str += (
-            f"**{bot.bot_prefix} bank {command['name']}**: "
-            f"{command['meta']['description']}\n"
-        )
-
-    await message.reply(help_str)
+    await generic_help(ctx, 'bank', sub_commands)
 
     # create
 cmd_meta = {}
@@ -101,7 +87,7 @@ async def view(ctx, action):
     user_account = howls_db.find_one({'user': message.author.id})
     reply = ''
 
-    if user_account == None:
+    if user_account == none:
         reply = 'you do not have a howling account'
     else:
         reply = f"you have {user_account['howls']} howls"
