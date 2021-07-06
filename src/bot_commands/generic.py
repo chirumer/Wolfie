@@ -15,22 +15,49 @@ def fix_args(func, *args, **kwargs):
         await func(ctx, *args, **kwargs)
     return fixed
 
-    # generic help command
+    #  generate help command
 help_meta = {}
 help_meta['description'] = 'get help on sub-commands'
-async def generic_help(ctx, cmd_name, sub_commands):
-    message = ctx['message']
-    bot = ctx['bot']
+def generate_generic_help(cmd_name, sub_commands, invalid_caller):
+    async def help(ctx, action=None):
+        if action:
+            await invalid_caller(ctx)
+            return
 
-    help_str = 'available usages:\n\n'
+        message = ctx['message']
+        bot = ctx['bot']
 
-    for command in sub_commands:
-        help_str += (
-            f"**{bot.bot_prefix} {cmd_name} {command['name']}**: "
-            f"{command['meta']['description']}\n"
-        )
+        help_str = 'available usages:\n\n'
 
-    await message.reply(help_str)
+        for command in sub_commands:
+            help_str += (
+                f"**{bot.bot_prefix} {cmd_name} {command['name']}**: "
+                f"{command['meta']['description']}\n"
+            )
+
+        await message.reply(help_str)
+    return help
+
+    # generate the command handler
+def generate_main_command(sub_commands, invalid_caller):
+    async def command(ctx, action):
+        if not action:
+            await invalid_caller(ctx)
+            return
+
+        message = ctx['message']
+        bot = ctx['bot']
+
+        sub_command = action.split()[0]
+        action = action[len(sub_command):].strip()
+
+        for command in sub_commands:
+            if command['name'] == sub_command:
+                await command['caller'](ctx, action)
+                break
+        else:
+            await invalid_caller(ctx)
+    return command
 
     # generate wrapper for sub commands
 def generate_sub_command_wrapper(sub_commands):

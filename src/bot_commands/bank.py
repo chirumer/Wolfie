@@ -2,13 +2,15 @@ from src.database import howls_db
     # database
 from src.bot_commands.generic import ( 
     improper_arguments, fix_args, 
-    generic_help, help_meta, generate_sub_command_wrapper
+    generate_generic_help, help_meta, 
+    generate_sub_command_wrapper,
+    generate_main_command
 ) # generic stuff
 
 sub_commands = []
 
-improper_arguments = fix_args(improper_arguments, cmd_name='bank')
 sub_command = generate_sub_command_wrapper(sub_commands)
+improper_arguments = fix_args(improper_arguments, cmd_name='bank')
 
 #### exports
 
@@ -19,31 +21,11 @@ meta['invoking_keywords'] = ['bank']
 meta['description'] = 'this command is not for robbing banks'
 
     # main command
-async def command(ctx, action):
-    if not action:
-        await improper_arguments(ctx)
-        return
-
-    message = ctx['message']
-    bot = ctx['bot']
-
-    sub_command = action.split()[0]
-    action = action[len(sub_command):].strip()
-
-    for command in sub_commands:
-        if command['name'] == sub_command:
-            await command['caller'](ctx, action)
-            break
-    else:
-        await improper_arguments(ctx)
+command = generate_main_command(sub_commands, improper_arguments)
 
     # help function
-@sub_command(help_meta)
-async def help(ctx, action=None):
-    if action:
-        await improper_arguments(ctx)
-        return
-    await generic_help(ctx, 'bank', sub_commands)
+help = generate_generic_help('bank', sub_commands, improper_arguments)
+help = sub_command(help_meta)(help)
 
 #### sub commands
 
