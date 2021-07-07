@@ -28,6 +28,10 @@ def make_command(func, meta, help_cmd=None):
 import src.bot_commands.hi as hi
 make_command(hi.command, hi.meta)
 
+    # thanks command
+import src.bot_commands.thanks as thanks
+make_command(thanks.command, thanks.meta)
+
     # reading command
 import src.bot_commands.reading as reading
 make_command(reading.command, reading.meta, reading.help)

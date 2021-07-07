@@ -26,8 +26,11 @@ async def on_thanks(payload):
         return
 
     thanked_persons = message.mentions
-    if message.author in thanked_persons: 
-        thanked_persons.remove(message.author)
+    thanked_persons = [
+        person for person in thanked_persons
+        if not person.bot
+        and person != message.author
+    ]
     if not thanked_persons:
             # not mentioned anyone
         return
