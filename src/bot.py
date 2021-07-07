@@ -170,14 +170,16 @@ class Sessions_handler():
             # maps session-type to sessions
 
     # add listener
-    def add(self, session_type, timeout, target, callback,
+    def add(self, session_type, timeout, targets, callback,
             timeout_callback=None, timeout_ctx=None, payload=None):
 
         expires_at = datetime.now() + timedelta(seconds=timeout)
+        if not isinstance(targets, list):
+            targets = [targets]
 
         session = {
             'expires_at': expires_at,
-            'target': target,
+            'targets': targets,
             'callback': callback,
             'timeout_callback': timeout_callback,
             'timeout_ctx': timeout_ctx,
@@ -217,7 +219,7 @@ class Sessions_handler():
 
         if self.is_accurate:
             for index, session in enumerate(self._sessions[incoming_type]):
-                if session['target'] == incoming:
+                if incoming in session['targets']:
                     asyncio.create_task(
                         session['callback'](ctx, session['payload'])
                         if session['payload'] != None
@@ -236,7 +238,7 @@ class Sessions_handler():
         for index, session in enumerate(self._sessions[incoming_type]):
             if session['expires_at'] <= time_now:
                 any_expired = True
-            elif session['target'] == incoming:
+            elif incoming in session['targets']:
                 asyncio.create_task(
                     session['callback'](ctx, session['payload'])
                     if session['payload'] != None
@@ -295,7 +297,13 @@ class Bot(discord.Client):
     def add_message_session(self, timeout, target, callback, timeout_callback,
             timeout_ctx, payload=None):
         self._sessions.add('message', timeout, target, callback, timeout_callback,
-                timeout_ctx, payload)
+            timeout_ctx, payload)
+
+    # add reaction session
+    def add_reaction_session(self, timeout, targets, callback, timeout_callback,
+            timeout_ctx, payload=None):
+        self._sessions.add('reaction', timeout, targets, callback, timeout_callback,
+            timeout_ctx, payload)
 
     # add default command
     def add_default_command(self, default_command):
@@ -309,6 +317,18 @@ class Bot(discord.Client):
     # notify that we've connected
     async def on_ready(self):
         print('Logged on as', self.user)
+
+
+    async def on_reaction_add(self, reaction, user):
+        ctx = {
+            'reaction': reaction
+        }
+        incoming = {
+            'user': user,
+            'message': reaction.message
+        }
+
+        self._sessions.emit('reaction', incoming, ctx)
 
 
     async def on_message(self, message):
@@ -327,12 +347,13 @@ class Bot(discord.Client):
         # dispatch message event
         payload = {}
         payload['message'] = message
+        payload['bot'] = self
         payload['is_self'] = message.author == self.user
         payload['in_session'] = in_session
         self._event_handler.emit('message', payload)
 
-        # don't respond to ourselves
-        if message.author == self.user:
+        # don't respond to bots
+        if message.author.bot:
             return
 
         # ignore session messages
@@ -368,5 +389,5 @@ wolfie_bot = Bot(config['bot_prefix'])
 from src.commands import commands, default_command
 wolfie_bot.add_commands(commands)
 wolfie_bot.add_default_command(default_command)
-from src.statistics import guild_message_statistics
-wolfie_bot.add_message_listener(guild_message_statistics)
+from src.statistics.on_thanks import on_thanks
+wolfie_bot.add_message_listener(on_thanks)
