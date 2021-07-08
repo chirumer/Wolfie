@@ -42,29 +42,53 @@ class Random_image():
 
             return self._images.pop()
 
+def generate_reddit_command(subreddit_name):
+    subreddit = Random_image(subreddit_name)
+    async def reddit_command(ctx, action):
+        message = ctx['message']
+        bot = ctx['bot']
 
-print('loading reddit data')
-memes = Random_image('memes', cache_limit=5)
-print('done')
+        if action:
+            await takes_no_args(ctx)
+
+        await message.reply(await subreddit.random_image())
+    return reddit_command
 
 ### exports
 
-    # meme
+print('loading reddit data..')
 
+metas = []
+commands = []
+
+    # meme
 meme_meta = {}
 meme_meta['name'] = 'meme'
 meme_meta['invoking_keywords'] = ['meme']
 meme_meta['description'] = 'view a random meme'
+metas.append(meme_meta)
+meme_command = generate_reddit_command('memes')
+commands.append(meme_command)
 
-async def meme_command(ctx, action):
-    message = ctx['message']
-    bot = ctx['bot']
+    # science
+science_meta = {}
+science_meta['name'] = 'science'
+science_meta['invoking_keywords'] = ['science']
+science_meta['description'] = 'view a random science related meme'
+metas.append(science_meta)
+science_command = generate_reddit_command('sciencememes')
+commands.append(science_command)
 
-    if action:
-        await takes_no_args(ctx)
+    # programming
+programming_meta = {}
+programming_meta['name'] = 'programming'
+programming_meta['invoking_keywords'] = ['programming']
+programming_meta['description'] = 'view a random programming meme'
+metas.append(programming_meta)
+programming_command = generate_reddit_command('ProgrammerHumor')
+commands.append(programming_command)
 
-    meme = await memes.random_image()
-    await message.reply(meme)
+print('done')
 
 
 async def take_no_args(ctx):
