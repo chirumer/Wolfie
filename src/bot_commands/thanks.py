@@ -1,13 +1,8 @@
 from src.database import thanks_db
     # mongodb collection
-from src.bot_commands.generic import (
-    improper_arguments, fix_args,
-)
 
-improper_arguments = fix_args(improper_arguments, cmd_name='thanks')
 
 #### exports
-
 
     # meta
 meta = {}
@@ -26,6 +21,7 @@ async def command(ctx, action):
             f'**type** {bot.bot_prefix} help\n'
             'for help'
         )
+        return
 
     leaderboard = 'top 10 thanked:\n\n'
 

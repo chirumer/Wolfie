@@ -40,6 +40,10 @@ make_command(reading.command, reading.meta, reading.help)
 import src.bot_commands.bank as bank
 make_command(bank.command, bank.meta, bank.help)
 
+from src.bot_commands.reddit import meme_meta, meme_command
+    # meme command
+make_command(meme_command, meme_meta)
+
     # help command
 help_meta = {}
 help_meta['invoking_keywords'] = ['help']
