@@ -91,7 +91,7 @@ commands.append(programming_command)
 print('done')
 
 
-async def take_no_args(ctx):
+async def takes_no_args(ctx):
     message = ctx['message']
     bot = ctx['bot']
 
