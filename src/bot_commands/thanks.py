@@ -25,7 +25,7 @@ async def command(ctx, action):
 
     leaderboard = 'top 10 thanked:\n\n'
 
-    leaders = thanks_db.find().sort('user', -1).limit(10)
+    leaders = thanks_db.find().sort('thanks', -1).limit(10)
 
     for index, leader in enumerate(leaders):
         user = await bot.fetch_user(leader['user'])
