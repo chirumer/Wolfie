@@ -50,6 +50,7 @@ def generate_reddit_command(subreddit_name):
 
         if action:
             await takes_no_args(ctx)
+            return
 
         await message.reply(await subreddit.random_image())
     return reddit_command
@@ -95,7 +96,7 @@ async def takes_no_args(ctx):
     message = ctx['message']
     bot = ctx['bot']
 
-    message.reply (
+    await message.reply (
         'this command takes no arguments..\n'
         f'**type** {bot.bot_prefix} help\n'
         'for help'
