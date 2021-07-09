@@ -3,6 +3,7 @@
 from src.database import thanks_db
     # mongodb collection for storing thanks data
 
+
 #### main
 
 thanks_keywords = ['thx', 'thanks', 'thnks', 'thnx', 'thank']

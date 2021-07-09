@@ -1,7 +1,7 @@
 #### imports
 
 from src.database import howls_db
-    # mongodb collection for storing howls information
+    # mongodb collection for howling bank account
 
 from src.bot_commands.generic import (
     generate_sub_command_wrapper,
@@ -83,7 +83,7 @@ async def earn(ctx):
     await message.reply(
         'currently the only way to earn howls is by **wolfie bonus**. '
         'It is a small amount of howls rewarded randomly '
-        'when a user is uses a bot command.'
+        'when a user uses a bot command.'
     )
 
 

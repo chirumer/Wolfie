@@ -94,6 +94,16 @@ misc_info = [
             '**thanks** command can be used to view the '
             'thanks leaderboard'
         )
+    },
+    {
+        'title': 'wolfie bonus',
+        'description': (
+            'There is a small chance of the bot rewarding '
+            'howls currency to the howling bank account of a user '
+            'who is using a bot command. '
+            '**bank** command can be used for commands '
+            'related to your howling bank account'
+        )
     }
 ]
 async def help_command(ctx):
@@ -135,7 +145,8 @@ async def help_command(ctx):
         for misc in misc_info:
             misc_embed.add_field(
                 name = misc['title'],
-                value = misc['description']
+                value = misc['description'],
+                inline = False
             )
 
         await message.reply(
