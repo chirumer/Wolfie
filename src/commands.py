@@ -134,7 +134,11 @@ async def help_command(ctx):
                 value = misc['description']
             )
 
-        await message.reply(embed = cmds_embed)
+        await message.reply(
+            f'**type** {bot.bot_prefix} help **<cmd_name>**\n'
+            'for more detailed help on **<cmd_name>**',
+            embed = cmds_embed
+        )
         await message.reply(embed = misc_embed)
         return
 
