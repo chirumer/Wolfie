@@ -1,0 +1,6 @@
+.env
+*.swp
+*.swo
+*~
+__pycache__
+TODO
