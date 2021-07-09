@@ -45,18 +45,6 @@ def make_command(caller, meta, help_cmd = default_help):
 #import src.bot_commands.test as test
 #make_command(test.command, test.meta)
 
-    # hi command
-import src.bot_commands.hi as hi
-make_command(hi.command, hi.meta)
-
-    # thanks command
-import src.bot_commands.thanks as thanks
-make_command(thanks.command, thanks.meta)
-
-    # dictionary command
-import src.bot_commands.dictionary as dictionary
-make_command(dictionary.command, dictionary.meta, dictionary.help)
-
     # reading command
 import src.bot_commands.reading as reading
 make_command(reading.command, reading.meta, reading.help)
@@ -67,6 +55,22 @@ from src.bot_commands.reddit import (
 )
 for command in reddit_commands:
     make_command(command['caller'], command['meta'])
+
+    # thanks command
+import src.bot_commands.thanks as thanks
+make_command(thanks.command, thanks.meta)
+
+    # bank command
+import src.bot_commands.bank as bank
+make_command(bank.command, bank.meta, bank.help)
+
+    # dictionary command
+import src.bot_commands.dictionary as dictionary
+make_command(dictionary.command, dictionary.meta, dictionary.help)
+
+    # hi command
+import src.bot_commands.hi as hi
+make_command(hi.command, hi.meta)
 
     # help command
 help_meta = {
@@ -159,6 +163,7 @@ async def help_command(ctx):
                 )
                 return
             else:
+                ctx['action'] = ''
                 await command['help'](ctx)
                 return
     else:
