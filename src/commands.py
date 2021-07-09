@@ -68,6 +68,10 @@ make_command(bank.command, bank.meta, bank.help)
 import src.bot_commands.dictionary as dictionary
 make_command(dictionary.command, dictionary.meta, dictionary.help)
 
+    # youtube command
+import src.bot_commands.youtube as youtube
+make_command(youtube.command, youtube.meta, youtube.help)
+
     # hi command
 import src.bot_commands.hi as hi
 make_command(hi.command, hi.meta)

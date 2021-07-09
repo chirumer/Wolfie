@@ -6,6 +6,7 @@ import requests
 from discord import Embed
     # for making embedded messages
 
+
 from src.bot_commands.generic import too_few_args
     # notify user: command requires more arguments
 
