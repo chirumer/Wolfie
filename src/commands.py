@@ -41,10 +41,6 @@ def make_command(caller, meta, help_cmd = default_help):
 
 #### commands
 
-    # test command
-#import src.bot_commands.test as test
-#make_command(test.command, test.meta)
-
     # reading command
 import src.bot_commands.reading as reading
 make_command(reading.command, reading.meta, reading.help)
