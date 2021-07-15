@@ -35,7 +35,7 @@ async def listener(ctx):
         'user': message.author.id
     }, {
         '$inc': {
-            'howls': 10
+            'howls': reward
         }
     })
     await message.reply(
